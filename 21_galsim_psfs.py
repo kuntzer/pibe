@@ -10,13 +10,13 @@ import utils
 
 ###################################################################################################
 # Defining variables
-
 # Pixel scale in arcsec / pixel
 pixel_scale = 0.1/12.
 
 image_size = 512
 
-n_psf = 200# 20000#0
+n_ini = 1000
+n_psf = 2000# 20000#0
 
 # Where to save the PSFs
 out_dir = 'output/psf_nonoise'
@@ -172,7 +172,7 @@ def worker(params):
 	
 ###################################################################################################
 # Running the worker
-params = range(n_psf)
+params = range(n_ini, n_psf)
 
 if ncpu == 1: # The single-processing version, much easier to debug !
 	makeimg = map(worker, params)
