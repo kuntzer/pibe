@@ -10,7 +10,7 @@ import pylab as plt
 # Defining variables
 
 # output dir
-sim_dir = "output/psf_nonoise"
+sim_dir = "output/psf_nonoise_smallpx"
 
 ###################################################################################################
 # Initialisation

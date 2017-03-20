@@ -157,9 +157,6 @@ def worker(params):
 	h = fits.Header()
 	h['x'] = xstar
 	h['y'] = ystar
-	h['g1'] = g1
-	h['g2'] = g2
-	h['fwhm'] = fwhm
 	fits.writeto(imfn, psf_imgi, clobber=True, header=h)
 
 	print 'Star {}: done, took {:s}'.format(istar, now - then)

@@ -11,7 +11,7 @@ import utils
 # Defining variables
 
 # Directory containing psf measurments
-cat_dir = "output/psf_nonoise"
+cat_dir = "output/psf_nonoise_smallpx"
 
 ###################################################################################################
 # Initialisation
