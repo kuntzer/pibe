@@ -11,12 +11,12 @@ import utils
 ###################################################################################################
 # Defining variables
 # Pixel scale in arcsec / pixel
-pixel_scale = 0.1/12.
+pixel_scale = 0.1#/12.
 
-image_size = 512
+image_size = 48
 
-n_ini = 1000
-n_psf = 2000# 20000#0
+n_ini = 0
+n_psf = 250# 20000#0
 
 # Where to save the PSFs
 out_dir = 'output/psf_nonoise'
@@ -157,6 +157,15 @@ def worker(params):
 	h = fits.Header()
 	h['x'] = xstar
 	h['y'] = ystar
+	
+	#TODO: jitter here!
+	#if jiiter:
+	#	ud = galsim.UniformDeviate() # This gives a random float in [0, 1)
+	#	# We apply some jitter to the position of this psf
+	#	xjitter = ud() - 0.5 # This is the minimum amount -- should we do more, as real stars are not that well centered in their stamps ?
+	#	yjitter = ud() - 0.5
+	#	psf_imgi = psf_imgi.shift(xjitter,yjitter)
+	
 	fits.writeto(imfn, psf_imgi, clobber=True, header=h)
 
 	print 'Star {}: done, took {:s}'.format(istar, now - then)

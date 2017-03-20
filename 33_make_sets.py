@@ -28,7 +28,7 @@ n_img_test = 100#000
 n_img_calib = 50#
 
 # Number of maximum psf images
-n_max_per_img = 16
+n_max_per_img = 15
 
 ###################################################################################################
 # Initialisation
@@ -100,13 +100,13 @@ for sn in set_names:
 			ys.append(header['Y'])
 			
 			if naxis1 is None or naxis2 is None:
-				naxis1 = header['NAXIS1']
-				naxis2 = header['NAXIS2']
+				naxis1 = header['NAXIS2']
+				naxis2 = header['NAXIS1']
 				npxim1 = naxis1 * iis
-				npxim2 = naxis2 * iis
-				setimg = np.zeros([npxim1, npxim2])
+				npxim2 = naxis2 * int(np.ceil((len(selected_psfs) + 0.0) / iis))
+				setimg = np.zeros([npxim2, npxim1])
 			
-			setimg[ix * naxis1:(ix+1)*naxis1, iy*naxis2:(iy+1)*naxis2] = psf
+			setimg[iy*naxis2:(iy+1)*naxis2, ix * naxis1:(ix+1)*naxis1] = psf
 
 			ixs.append(ix)
 			iys.append(iy)
@@ -120,23 +120,27 @@ for sn in set_names:
 		fits.writeto(imfn, setimg, clobber=True, header=h)
 		xs = np.array(xs)
 		ys = np.array(ys)
+		ixs = np.array(ixs)
+		iys = np.array(iys)
 		
 		g1s = interp_g1.ev(xs, ys)
 		g2s = interp_g2.ev(xs, ys)
 		fwhms = interp_fwhm.ev(xs, ys)
 		
-		catt = Table([ixs, iys, xs, ys, g1s, g2s, fwhms], names=('ix', 'iy', 'x', 'y', 'g1', 'g2', 'fwhm'))
+		catt = Table([ixs.tolist(), iys.tolist(), ((ixs + 0.5) * naxis1).tolist(), ((iys + 0.5) * naxis2).tolist(), 
+					xs, ys, g1s, g2s, fwhms], names=('xcol', 'ycol', 'xcat', 'ycat', 'xfield', 'yfield', 'g1', 'g2', 'fwhm'))
 		catt['fwhm'].unit = 'arcsec'
 		
-		cats = Table([ixs, iys, xs, ys], names=('ix', 'iy', 'x', 'y'))
+		cats = Table([ixs.tolist(), iys.tolist(), ((ixs + 0.5) * naxis1).tolist(), ((iys + 0.5) * naxis2).tolist(), xs, ys], 
+					names=('xcol', 'ycol', 'xcat', 'ycat', 'xfield', 'yfield'))
 		
 		catfnt = os.path.join(out_dir, sn, "{}_{:03d}_truth_cat.fits".format(sn, iimg))
 		catfns = os.path.join(out_dir, sn, "{}_{:03d}_source_cat.fits".format(sn, iimg))
+		
 		catt.write(catfnt, overwrite=True)
 		cats.write(catfns, overwrite=True)
 		
 		assert np.unique(len(used_fns)) == count_img
 
 	icurrent += ntot
-	
-	
+
