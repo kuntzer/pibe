@@ -16,7 +16,7 @@ pixel_scale = 0.1#/12.
 image_size = 48
 
 n_ini = 0
-n_psf = 250# 20000#0
+n_psf = 150000
 
 # Where to save the PSFs
 out_dir = 'output/psf_nonoise'

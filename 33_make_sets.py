@@ -10,25 +10,25 @@ import utils
 # Defining variables
 
 # path to input simulated PSFs 
-sim_dir = "output/psf_nonoise_smallpx"
+sim_dir = "output/psf_nonoise*"
 
-# Output dir 
+# Interpolation dir 
 interp_dir = "output/psf_nonoise_smallpx"
 
 # Output dir 
-out_dir = "output/datasets"
+out_dir = "output/datasets_bigpx"
 
 # Number of simulations in the training set
-n_img_train = 50#000
+n_img_train = 196#000
 
 # Number of simulations in the test set
-n_img_test = 100#000
+n_img_test = 4#000
 
 # Number of simualtions in the calibration set
-n_img_calib = 50#
+n_img_calib = 0#
 
 # Number of maximum psf images
-n_max_per_img = 15
+n_max_per_img = 196
 
 ###################################################################################################
 # Initialisation
@@ -37,7 +37,7 @@ iitrain = int(np.ceil(np.sqrt(n_max_per_img)))
 iitest = int(np.ceil(np.sqrt(n_max_per_img)))
 iicalib = int(np.ceil(np.sqrt(n_max_per_img)))
 
-all_psfs = glob.glob(os.path.join(sim_dir+'*', "star_*.fits"))
+all_psfs = glob.glob(os.path.join(sim_dir, "star_*.fits"))
 
 set_names = ['train', 'test', 'calib']
 
@@ -94,6 +94,8 @@ for sn in set_names:
 				print "\t\tLoading psf {}/{}".format(kkimg + 1, len(selected_psfs))
 				
 			psf = fits.getdata(fn_psf)
+			flux = psf.sum()
+			psf /= flux
 			header = fits.getheader(fn_psf)
 			
 			xs.append(header['X'])
@@ -117,6 +119,10 @@ for sn in set_names:
 				iy += 1
 				
 		h = fits.Header()
+		h["nlines"] = int(np.ceil((len(selected_psfs) + 0.0) / iis))
+		h["ncols"] = iis
+		h["nxpsf1"] = naxis1
+		h["nxpsf2"] = naxis2
 		fits.writeto(imfn, setimg, clobber=True, header=h)
 		xs = np.array(xs)
 		ys = np.array(ys)
