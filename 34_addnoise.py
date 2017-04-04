@@ -96,7 +96,7 @@ for name in names:
 				
 				print "\t\tMean SNR = {:.2f} +/- {:.2f}".format(snr.mean(), snr.std())
 			
-			fits.writeto(os.path.join(cout, "train_{:03}.fits".format(ii_fn)), im, header, clobber=True)
+			fits.writeto(os.path.join(cout, "{}_{:03}.fits".format(name, ii_fn)), im, header, clobber=True)
 			
 			os.path.join(out_dir, name)
 			fns = glob.glob(os.path.join(iin, "{}_{:03}_*_cat.fits".format(name,ii_fn)))
