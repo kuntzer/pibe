@@ -133,12 +133,15 @@ for sn in set_names:
 		g2s = interp_g2.ev(xs, ys)
 		fwhms = interp_fwhm.ev(xs, ys)
 		
-		catt = Table([ixs.tolist(), iys.tolist(), ((ixs + 0.5) * naxis1).tolist(), ((iys + 0.5) * naxis2).tolist(), 
-					xs, ys, g1s, g2s, fwhms], names=('xcol', 'ycol', 'xcat', 'ycat', 'xfield', 'yfield', 'g1', 'g2', 'fwhm'))
+		catt = Table([ixs.tolist(), iys.tolist(), ((ixs + 0.5) * naxis1).tolist(), ((iys + 0.5) * naxis2).tolist(),
+					((iys + 0.5) * naxis2).tolist(),  ((ixs + 0.5) * naxis1).tolist(), 
+					xs, ys, g1s, g2s, fwhms], names=('xcol', 'ycol', 'xcat', 'ycat', 'xpycat', 'ypycat', 'xfield', 'yfield', 'g1', 'g2', 'fwhm'))
 		catt['fwhm'].unit = 'arcsec'
 		
-		cats = Table([ixs.tolist(), iys.tolist(), ((ixs + 0.5) * naxis1).tolist(), ((iys + 0.5) * naxis2).tolist(), xs, ys], 
-					names=('xcol', 'ycol', 'xcat', 'ycat', 'xfield', 'yfield'))
+		cats = Table([ixs.tolist(), iys.tolist(), ((ixs + 0.5) * naxis1).tolist(), ((iys + 0.5) * naxis2).tolist(), 
+					((iys + 0.5) * naxis2).tolist(), ((ixs + 0.5) * naxis1).tolist(), 
+					xs, ys], 
+					names=('xcol', 'ycol', 'xcat', 'ycat', 'xpycat', 'ypycat', 'xfield', 'yfield'))
 		
 		catfnt = os.path.join(out_dir, sn, "{}_{:03d}_truth_cat.fits".format(sn, iimg))
 		catfns = os.path.join(out_dir, sn, "{}_{:03d}_source_cat.fits".format(sn, iimg))
