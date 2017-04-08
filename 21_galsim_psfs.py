@@ -75,7 +75,7 @@ show = False
 jitter = True
 
 # ncpu
-ncpu = 1
+ncpu = 5
 
 if not os.path.exists(out_dir):
 	os.makedirs(out_dir)
@@ -159,6 +159,8 @@ def worker(params):
 		# We apply some jitter to the position of this psf
 		xjitter = ud() - 0.5 # This is the minimum amount -- should we do more, as real stars are not that well centered in their stamps ?
 		yjitter = ud() - 0.5
+		xjitter *= pixel_scale
+		yjitter *= pixel_scale
 	
 	for ii, ilam in enumerate(ids):
 	
