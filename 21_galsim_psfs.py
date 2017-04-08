@@ -16,10 +16,10 @@ pixel_scale = 0.1#/12.
 image_size = 48
 
 n_ini = 0
-n_psf = 150000
+n_psf = 10000#15#0000
 
 # Where to save the PSFs
-out_dir = 'output/psf_nonoise'
+out_dir = 'output/psf_nonoise_colour'
 
 # Where are the interpolation functions
 interp_dir = "inputdata/fullpsffield"
@@ -32,7 +32,38 @@ filterband_min = 4750.
 filterband_max = 9700.
 
 # Which spectra for the star?
-spectra_id = 27 # G5V
+# G5V == 27
+"""
+# FILENAME      SPTYPE    EFF TEMP. (K)
+pickles_uk_1    O5V     39810.7
+pickles_uk_2    O9V     35481.4
+pickles_uk_3    B0V     28183.8
+pickles_uk_4    B1V     22387.2
+pickles_uk_5    B3V     19054.6
+pickles_uk_6    B6V   14125.4 # B5-7V, but changed to be read automatically
+pickles_uk_7    B8V     11749.0
+pickles_uk_9    A0V     9549.93
+pickles_uk_10   A2V     8912.51
+pickles_uk_11   A3V     8790.23
+pickles_uk_12   A5V     8491.80
+pickles_uk_14   F0V     7211.08
+pickles_uk_15   F2V     6776.42
+pickles_uk_16   F5V     6531.31
+pickles_uk_20   F8V     6039.48
+pickles_uk_23   G0V     5807.64
+pickles_uk_26   G2V     5636.38
+pickles_uk_27   G5V     5584.70
+pickles_uk_30   G8V     5333.35
+pickles_uk_31   K0V     5188.00
+pickles_uk_33   K2V     4886.52
+pickles_uk_36   K5V     4187.94
+pickles_uk_37   K7V     3999.45
+pickles_uk_38   M0V     3801.89
+pickles_uk_40   M2V     3548.13
+pickles_uk_43   M4V     3111.72
+pickles_uk_44   M5V     2951.21
+"""
+spectra_ids = [1,2,3,4,5,6,7,9,10,11,12,14,15,16,20,23,26,27,30,31,33,36,37,38,40,43,44] 
 
 # Skip already drawn images in the output dir?
 skipdone = True
@@ -40,8 +71,11 @@ skipdone = True
 # Show for debug purposes
 show = False
 
+# Include jitter?
+jitter = True
+
 # ncpu
-ncpu = 5
+ncpu = 1
 
 if not os.path.exists(out_dir):
 	os.makedirs(out_dir)
@@ -62,12 +96,6 @@ psf_trefoil2 = +0.01 * 0.8#1
 
 ###################################################################################################
 # Initialisation
-spectrum = fits.getdata(os.path.join(spectra_dir, "dat_uvi/pickles_%d.fits" % spectra_id), view=np.ndarray)
-spectrum = spectrum.astype([('WAVELENGTH', '>f4'), ('FLUX', '>f4')]).view('>f4').reshape(len(spectrum), -1)
-
-ids = np.where(spectrum[:,0] >= filterband_min)[0]
-ids2 = np.where(spectrum[ids,0] <= filterband_max)[0]
-ids = ids[ids2][::40]
 
 if not os.path.exists("output"):
 	os.mkdir("output")
@@ -102,6 +130,14 @@ def worker(params):
 	
 	istar = params
 	
+	spectra_id = np.random.choice(spectra_ids)
+	spectrum = fits.getdata(os.path.join(spectra_dir, "dat_uvi/pickles_%d.fits" % spectra_id), view=np.ndarray)
+	spectrum = spectrum.astype([('WAVELENGTH', '>f4'), ('FLUX', '>f4')]).view('>f4').reshape(len(spectrum), -1)
+	
+	ids = np.where(spectrum[:,0] >= filterband_min)[0]
+	ids2 = np.where(spectrum[ids,0] <= filterband_max)[0]
+	ids = ids[ids2][::40]
+	
 	imfn = os.path.join(out_dir, "star_%05d.fits" % istar)
 	
 	if os.path.exists(imfn) and skipdone:
@@ -114,9 +150,16 @@ def worker(params):
 	g2 = ing2(xstar, ystar)[0][0]
 	fwhm = infwhm(xstar, ystar)[0][0]
 	
-	print 'Star {}: (x={:.3f},y={:.3f})'.format(istar, xstar, ystar)
+	print 'Star {}: (x={:.3f},y={:.3f}), spectrum id={}'.format(istar, xstar, ystar, spectra_id)
 	psf_imgi = None
 	then = datetime.datetime.now()
+	
+	if jitter:
+		ud = galsim.UniformDeviate() # This gives a random float in [0, 1)
+		# We apply some jitter to the position of this psf
+		xjitter = ud() - 0.5 # This is the minimum amount -- should we do more, as real stars are not that well centered in their stamps ?
+		yjitter = ud() - 0.5
+	
 	for ii, ilam in enumerate(ids):
 	
 		lam = spectrum[ilam,0] # unit: angstrom
@@ -136,6 +179,9 @@ def worker(params):
 		#print '%d\t%+1.2f\t%+1.2f' % (i, g1, g2)
 		
 		psf = psf.shear(g1=g1/2., g2=g2*1.7)
+		
+		if jitter:
+			psf = psf.shift(xjitter,yjitter)
 		
 		image = galsim.ImageF(image_size, image_size)
 		psf.drawImage(image=image, scale=pixel_scale)
@@ -157,14 +203,7 @@ def worker(params):
 	h = fits.Header()
 	h['x'] = xstar
 	h['y'] = ystar
-	
-	#TODO: jitter here!
-	#if jiiter:
-	#	ud = galsim.UniformDeviate() # This gives a random float in [0, 1)
-	#	# We apply some jitter to the position of this psf
-	#	xjitter = ud() - 0.5 # This is the minimum amount -- should we do more, as real stars are not that well centered in their stamps ?
-	#	yjitter = ud() - 0.5
-	#	psf_imgi = psf_imgi.shift(xjitter,yjitter)
+	h['spectrid'] = spectra_id
 	
 	fits.writeto(imfn, psf_imgi, clobber=True, header=h)
 
