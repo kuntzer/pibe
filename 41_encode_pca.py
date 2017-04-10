@@ -19,7 +19,7 @@ out_dir = "output/encode_pca"
 
 run_on = "train"
 
-run_on_snr = "no"
+run_on_snr = "20"
 
 n_components = 8
 
