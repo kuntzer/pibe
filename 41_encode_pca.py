@@ -25,7 +25,7 @@ n_components = 8
 
 do_pca = True
 do_interp = True
-show = True
+show = False
 
 ###################################################################################################
 # Learning to compress
@@ -119,18 +119,29 @@ for ro, rs in zzip:
 	for ii in range(nps):
 		datastamps = []
 		
-		#data = fits.getdata(os.path.join(loaddir, "{}_{:03}.fits".format(ro, ii)))
+		data = fits.getdata(os.path.join(loaddir, "{}_{:03}.fits".format(ro, ii)))
 		source_cat = Table.read(os.path.join(in_dir, ro, "catalogs", "{}_{:03}_truth_cat.fits".format(ro, ii)))
 		x = source_cat["xfield"]
 		y = source_cat["yfield"]
+		
+		for xcol, ycol in source_cat["xpycat", "ypycat"]:
+			stamp = data[xcol - 24: xcol + 24, ycol - 24: ycol + 24].flatten()
+			datastamps.append(stamp)
+		datastamps = np.asarray(datastamps)
+		
+		composants = pca.transform(datastamps)
+		xys = np.vstack([np.array(source_cat["xfield"]), np.array(source_cat["yfield"])]).T
+		composants = np.hstack([xys, composants])
+		utils.writepickle(composants, os.path.join(out_dir, "snr_{}_{}_calib_{:03}.pkl".format(rs, ro, ii)))
+				
 		
 		composants = []
 		for inti in interpolants:
 			composants.append(inti.ev(x, y))
 		composants = np.array(composants).T
 
-		xys = np.vstack([np.array(source_cat["xfield"]), np.array(source_cat["yfield"])]).T
 		composants = np.hstack([xys, composants])
+		
 		
 		utils.writepickle(composants, os.path.join(out_dir, "snr_{}_{}_{:03}.pkl".format(rs, ro, ii)))
 		
