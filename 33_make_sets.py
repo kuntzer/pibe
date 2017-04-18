@@ -10,13 +10,13 @@ import utils
 # Defining variables
 
 # path to input simulated PSFs 
-sim_dir = "output/psf_nonoise*"
+sim_dir = "output/psf_nonoise_colour*"
 
 # Interpolation dir 
 interp_dir = "output/psf_nonoise_smallpx"
 
 # Output dir 
-out_dir = "output/datasets_bigpx"
+out_dir = "output/datasets_bigpx_colour"
 
 # Number of simulations in the training set
 n_img_train = 196#000
@@ -83,6 +83,7 @@ for sn in set_names:
 		ys = []
 		ixs = []
 		iys = []
+		colours = []
 		
 		imfn = os.path.join(out_dir, sn, "{}_{:03d}.fits".format(sn, iimg))
 		selected_psfs = apfss[iimg * n_max_per_img: (iimg + 1) * n_max_per_img]
@@ -100,6 +101,7 @@ for sn in set_names:
 			
 			xs.append(header['X'])
 			ys.append(header['Y'])
+			colours.append(header['spectrid'])
 			
 			if naxis1 is None or naxis2 is None:
 				naxis1 = header['NAXIS2']
@@ -135,7 +137,7 @@ for sn in set_names:
 		
 		catt = Table([ixs.tolist(), iys.tolist(), ((ixs + 0.5) * naxis1).tolist(), ((iys + 0.5) * naxis2).tolist(),
 					((iys + 0.5) * naxis2).tolist(),  ((ixs + 0.5) * naxis1).tolist(), 
-					xs, ys, g1s, g2s, fwhms], names=('xcol', 'ycol', 'xcat', 'ycat', 'xpycat', 'ypycat', 'xfield', 'yfield', 'g1', 'g2', 'fwhm'))
+					xs, ys, g1s, g2s, fwhms, colours], names=('xcol', 'ycol', 'xcat', 'ycat', 'xpycat', 'ypycat', 'xfield', 'yfield', 'g1', 'g2', 'fwhm', "spectrid"))
 		catt['fwhm'].unit = 'arcsec'
 		
 		cats = Table([ixs.tolist(), iys.tolist(), ((ixs + 0.5) * naxis1).tolist(), ((iys + 0.5) * naxis2).tolist(), 

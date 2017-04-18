@@ -25,6 +25,7 @@ fwhms = []
 xstars = []
 ystars = []
 catseqs = []
+colours = []
 
 ###################################################################################################
 # measurements of the PSFs
@@ -45,6 +46,7 @@ for istar, fnpsf in enumerate(psfs):
 	
 	xstars.append(header['X'])
 	ystars.append(header['Y'])
+	colours.append(header['spectrid'])
 	g1s.append(res.observed_shape.g1)
 	g2s.append(res.observed_shape.g2)
 	fwhms.append(res.moments_sigma * np.sqrt(2. *np.log(2)) * 2. / 12.)

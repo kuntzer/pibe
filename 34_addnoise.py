@@ -13,10 +13,10 @@ import pylab as plt
 # Defining variables
 
 # Dataset dir 
-dset_dir = "output/datasets_bigpx"
+dset_dir = "output/datasets_bigpx_colour"
 
 # Output dir 
-out_dir = "output/datasets_packaged"
+out_dir = "output/datasets_packaged_colour"
 
 target_snr = [20, 100, -1] 
 
