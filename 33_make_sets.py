@@ -10,25 +10,25 @@ import utils
 # Defining variables
 
 # path to input simulated PSFs 
-sim_dir = "output/psf_nonoise_colour*"
+sim_dir = "output/psf_nonoise*"
 
 # Interpolation dir 
-interp_dir = "output/psf_nonoise_smallpx"
+interp_dir = "output/"
 
 # Output dir 
-out_dir = "output/datasets_bigpx_colour"
+out_dir = "output/datasets2"
 
 # Number of simulations in the training set
-n_img_train = 196#000
+n_img_train = 50000
 
 # Number of simulations in the test set
-n_img_test = 4#000
+n_img_test = 100000
 
 # Number of simualtions in the calibration set
-n_img_calib = 0#
+n_img_calib = 0
 
 # Number of maximum psf images
-n_max_per_img = 196
+n_max_per_img = 10000
 
 ###################################################################################################
 # Initialisation
@@ -37,7 +37,7 @@ iitrain = int(np.ceil(np.sqrt(n_max_per_img)))
 iitest = int(np.ceil(np.sqrt(n_max_per_img)))
 iicalib = int(np.ceil(np.sqrt(n_max_per_img)))
 
-all_psfs = glob.glob(os.path.join(sim_dir, "star_*.fits"))
+all_psfs = sorted(glob.glob(os.path.join(sim_dir+'*', "star_*.fits")))
 
 set_names = ['train', 'test', 'calib']
 
@@ -53,11 +53,10 @@ count_img = 0
 ###################################################################################################
 # Creating the images + truth & source catalogues
 
+icurrent = 0
 for sn in set_names:
 	
 	print "Starting on data set {}".format(sn)
-		
-	icurrent = 0
 	ntot = eval("n_img_{}".format(sn))
 	iis = eval("ii{}".format(sn))
 	
@@ -91,7 +90,7 @@ for sn in set_names:
 			used_fns.append(int((fn_psf.split('.fits')[0]).split("/star_")[1]))
 			count_img += 1
 			
-			if kkimg % 10 == 0:
+			if kkimg % 1000 == 0:
 				print "\t\tLoading psf {}/{}".format(kkimg + 1, len(selected_psfs))
 				
 			psf = fits.getdata(fn_psf)
