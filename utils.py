@@ -1,6 +1,8 @@
 import cPickle as pickle
 import gzip
 import os
+import numpy as np
+import csv
 
 def writepickle(obj, filepath, protocol = -1):
 	"""
@@ -42,3 +44,26 @@ def colnorm(cat, name, oname=None):
 		cat[name] = col
 	else:
 		cat[oname] = col
+		
+def find_nearest(array,value):
+	''' Find nearest value is an array '''
+	idx = (np.abs(array-value)).argmin()
+	return idx
+
+def load_bmg(fname, main_sequence):	
+	data=[]
+	with open(fname+'.dat') as observability_file:
+		observability_data = csv.reader(observability_file, delimiter="\t")
+		for row in observability_data:
+		# if line is empty, skip otherwise filter out the blank
+			dline=row[0].split()
+			if len(dline)==17 and not dline[6].isdigit():
+				dline.insert(6, '0')
+			if dline[0][0]=='#': continue
+			data.append(np.asarray(dline, dtype=np.float))
+			
+	data=np.asarray(data)
+	if main_sequence: 
+		data=data[data[:,2] == 5] #Takes only main sequence stars
+	
+	return data

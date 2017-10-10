@@ -18,6 +18,7 @@ dset_dir = "output/datasets_bigpx_colour"
 # Output dir 
 out_dir = "output/datasets_packaged_colour"
 
+# if a list, then this is the targets, if not give BMG filepath
 target_snr = [20, 100, -1] 
 
 debug_show = False
@@ -29,9 +30,13 @@ names = ["train", "test", "calib"]
 
 if not os.path.exists(out_dir):
 	os.mkdir(out_dir)
-	
-target_snr = np.array(target_snr)
-sigmas = 1. / (np.pi * (1.25 * 1.225)**2 * target_snr)
+
+if type(target_snr) == list:	
+	target_snr = np.array(target_snr)
+	sigmas = 1. / (np.pi * (1.25 * 1.225)**2 * target_snr)
+elif type(target_snr) == string :
+	print type(target_snr)
+exit()
 
 ###################################################################################################
 # Engine start 

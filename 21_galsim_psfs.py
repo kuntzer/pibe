@@ -5,21 +5,22 @@ import os
 import astropy.io.fits as fits
 import datetime
 import multiprocessing
+import re 
 
 import utils
 
 ###################################################################################################
 # Defining variables
 # Pixel scale in arcsec / pixel
-pixel_scale = 0.1/12.
+pixel_scale = 0.1#/12.
 
 image_size = 48
 
 n_ini = 0
-n_psf = 500#00#15#0000
+n_psf = 2000#00#15#0000
 
 # Where to save the PSFs
-out_dir = 'output/psf_nonoise_smallpx_SED1_test'
+out_dir = 'output/psf_nonoise_euclidlike'
 
 # Where are the interpolation functions
 interp_dir = "inputdata/fullpsffield"
@@ -63,7 +64,11 @@ pickles_uk_40   M2V     3548.13
 pickles_uk_43   M4V     3111.72
 pickles_uk_44   M5V     2951.21
 """
-spectra_ids = [1]#[1,2,3,4,5,6,7,9,10,11,12,14,15,16,20,23,26,27,30,31,33,36,37,38,40,43,44] 
+spectra_ids = [1,2,3,4,5,6,7,9,10,11,12,14,15,16,20,23,26,27,30,31,33,36,37,38,40,43,44] 
+
+# Distribution of spectrum (either "flat" or give path BMG path [with all text commented or removed])
+# Should be a list
+distrib_spectrum = ["inputdata/BGM/star_field_BGM_i_180_15_{}".format(fid) for fid in range(1,6)]
 
 # Skip already drawn images in the output dir?
 skipdone = True
@@ -72,7 +77,7 @@ skipdone = True
 show = False
 
 # Include jitter?
-jitter = False
+jitter = True
 
 # ncpu
 ncpu = 5
@@ -121,6 +126,40 @@ print '****************'
 def corr_size(r, minr, maxr, effmaxr=.3):
 	return (r - minr) / (maxr - minr) * effmaxr + 1.
 
+if type(distrib_spectrum) == list:
+	try:
+		catstar = utils.readpickle(out_dir+"_catstar.pkl")
+		print 'loading from file'
+	except:
+		catstar = None
+		for dsfn in  distrib_spectrum:
+			print 'loading BMG file: {}'.format(dsfn)
+		
+			starss = utils.load_bmg(dsfn, main_sequence=True)
+			
+			if catstar is None:
+				catstar = starss
+			else:
+				catstar = np.vstack([catstar, starss])
+		
+		ids = np.arange(np.shape(catstar)[0])
+		np.random.shuffle(ids)
+		catstar = catstar[ids]
+		utils.writepickle(catstar, out_dir+"_catstar.pkl")
+			
+# Use spectra/pickles/UVILIB 
+# Builds the reference array
+# Stellar types are 1=O, ..., M = 7
+stellar_types = np.array(['', 'O', 'B', 'A', 'F', 'G', 'K', 'M', 'AGB', 'WD'])
+
+st_fnames = np.genfromtxt("inputdata/spectra/pickles/filenames.dat", dtype=["S15", "S15", "f8"])
+spectra_fnames = np.empty([len(st_fnames), 3])
+for ii, (f, st, _) in enumerate(st_fnames) :
+	sclass = np.where(st[0] == stellar_types)[0][0]
+	ssubclass = st[1:-1]
+	m = re.search('(?<=uk_)\w+', f)
+	spectra_fnames[ii] = [sclass, ssubclass, m.group(0)]
+
 ###################################################################################################
 # defining the worker function
 def worker(params):
@@ -129,8 +168,16 @@ def worker(params):
 	np.random.seed()
 	
 	istar = params
-	
-	spectra_id = np.random.choice(spectra_ids)
+	if distrib_spectrum == "flat":
+		spectra_id = np.random.choice(spectra_ids)
+	elif type(distrib_spectrum) == list:
+		spec_name = catstar[istar,3]
+		
+		sub, let = np.modf(spec_name)
+		spec_dispo = spectra_fnames[spectra_fnames[:,0]==let,:]
+		idsub = utils.find_nearest(spec_dispo[:,1], sub * 10.)
+		spectra_id = spec_dispo[idsub,2]
+
 	spectrum = fits.getdata(os.path.join(spectra_dir, "dat_uvi/pickles_%d.fits" % spectra_id), view=np.ndarray)
 	spectrum = spectrum.astype([('WAVELENGTH', '>f4'), ('FLUX', '>f4')]).view('>f4').reshape(len(spectrum), -1)
 	
