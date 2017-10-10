@@ -8,9 +8,9 @@ import os
 ###################################################################################################
 # Defining variables
 
-# 'STEP_04750x09700', # Step euclid in Angstrom
-filterband_min = 4750. 
-filterband_max = 9700.
+# 'STEP_05500x09000', # Step euclid in Angstrom
+filterband_min = 5500. 
+filterband_max = 6000.#9000.
 
 # Which spectra should be used?
 spectra_id = 27 # G5V
@@ -64,6 +64,7 @@ for istar, fnpsf in enumerate(euclid_psfs):
 	cubepsf = fits.open(fnpsf)
 	
 	for ipsf, wpsf in enumerate(cubepsf):
+		
 		if ipsf == 0:
 			continue
 		elif ipsf == 1:
@@ -73,9 +74,11 @@ for istar, fnpsf in enumerate(euclid_psfs):
 			wavls.append(wavl)
 			catseqs.append(wpsf.header["CATSEQ"])
 			
+		wavl = wpsf.header["WLGTH0"] * 10000
+			
 		if wavl < filterband_min or wavl > filterband_max :
 			continue
-			
+
 		fspec = spectrum[:,0] == wavl
 		# Check that we found one matching wavelenght
 		assert np.size(spectrum[fspec, 1]) == 1

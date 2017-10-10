@@ -11,9 +11,15 @@ import utils
 # Defining variables
 
 # Directory containing psf measurments
-cat_dir = "output/psf_nonoise_smallpx"
+sed = 3
 
-plot_white = True
+cat_dir = "output/psf_nonoise_smallpx_SED{}".format(sed)
+
+out_dir = "output/interpolations"
+out_name = "interp_SED{}.pkl".format(sed)
+
+plot_white = False
+show = False
 
 ###################################################################################################
 # Initialisation
@@ -74,10 +80,11 @@ for intp in ['g1', 'g2', 'fwhm']:
 	plt.colorbar(cb)
 	plt.xlabel("field of view x-axis")
 	plt.ylabel("field of view y-axis")
-	plt.show()
+	if show:
+		plt.show()
 	
 # Now saving!
-intfn = os.path.join(cat_dir, "interp.pkl")
-#utils.writepickle([interp_g1, interp_g2, interp_fwhm], intfn)
+intfn = os.path.join(out_dir, out_name)
+utils.writepickle([interp_g1, interp_g2, interp_fwhm], intfn)
 print 'Saved interpolants to {}'.format(intfn)
 	

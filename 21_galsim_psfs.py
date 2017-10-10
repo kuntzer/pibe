@@ -11,15 +11,15 @@ import utils
 ###################################################################################################
 # Defining variables
 # Pixel scale in arcsec / pixel
-pixel_scale = 0.1#/12.
+pixel_scale = 0.1/12.
 
 image_size = 48
 
 n_ini = 0
-n_psf = 10000#15#0000
+n_psf = 500#00#15#0000
 
 # Where to save the PSFs
-out_dir = 'output/psf_nonoise_colour'
+out_dir = 'output/psf_nonoise_smallpx_SED1_test'
 
 # Where are the interpolation functions
 interp_dir = "inputdata/fullpsffield"
@@ -27,9 +27,9 @@ interp_dir = "inputdata/fullpsffield"
 # Directory with the spectra (where the README of Pickles is)
 spectra_dir = "inputdata/spectra/pickles"
 
-# 'STEP_04750x09700', # Step euclid in Angstrom
-filterband_min = 4750. 
-filterband_max = 9700.
+# 'STEP_05500x09000', # Step euclid in Angstrom
+filterband_min = 5500. 
+filterband_max = 9000.
 
 # Which spectra for the star?
 # G5V == 27
@@ -63,7 +63,7 @@ pickles_uk_40   M2V     3548.13
 pickles_uk_43   M4V     3111.72
 pickles_uk_44   M5V     2951.21
 """
-spectra_ids = [1,2,3,4,5,6,7,9,10,11,12,14,15,16,20,23,26,27,30,31,33,36,37,38,40,43,44] 
+spectra_ids = [1]#[1,2,3,4,5,6,7,9,10,11,12,14,15,16,20,23,26,27,30,31,33,36,37,38,40,43,44] 
 
 # Skip already drawn images in the output dir?
 skipdone = True
@@ -72,7 +72,7 @@ skipdone = True
 show = False
 
 # Include jitter?
-jitter = True
+jitter = False
 
 # ncpu
 ncpu = 5
